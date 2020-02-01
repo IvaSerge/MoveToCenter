@@ -24,6 +24,9 @@ uidoc=DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
 clr.AddReference('RevitAPIUI')
 from Autodesk.Revit.UI import *
 
+def ft_to_mm(ft):
+	return ft*304.8
+
 uiapp = DocumentManager.Instance.CurrentUIApplication
 uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
 app = uiapp.Application
@@ -48,6 +51,18 @@ obList = list()
 map(lambda x: obList.append(doc.GetElement(x.ElementId)), refList)
 
 #new point coordinates calculation
+midPointX = (obList[0].Location.Point.X 
+           + obList[1].Location.Point.X)/2
+midPointY =(obList[0].Location.Point.Y
+           + obList[1].Location.Point.Y)/2
 
+vectorX = midPointX - obList[2].Location.Point.X
+vectorY = midPointY - obList[2].Location.Point.Y
+midPointXYZ = XYZ(vectorX, vectorY , 0)
 
-OUT = obList
+#move element
+TransactionManager.Instance.EnsureInTransaction(doc)
+ElementTransformUtils.MoveElement(doc,  obList[2].Id, midPointXYZ)
+TransactionManager.Instance.TransactionTaskDone()
+
+OUT = midPointXYZ,  obList[2]
