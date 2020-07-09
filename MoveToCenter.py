@@ -32,12 +32,18 @@ uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
 app = uiapp.Application
 
 reLoad = IN[0]
-selob = uidoc.Selection.PickObjects(
+
+Ob1 = uidoc.Selection.PickObject(
             Autodesk.Revit.UI.Selection.ObjectType.Element,
             "Selection of two elements")
 
-if len(selob) != 2:
-    raise ValueError("Only 2 elements need to be selected")
+Ob2 = uidoc.Selection.PickObject(
+            Autodesk.Revit.UI.Selection.ObjectType.Element,
+            "Selection of two elements")
+
+selob = list()
+selob.append(Ob1)
+selob.append(Ob2)
 
 lastob = uidoc.Selection.PickObject(
             Autodesk.Revit.UI.Selection.ObjectType.Element,
@@ -51,7 +57,7 @@ obList = list()
 map(lambda x: obList.append(doc.GetElement(x.ElementId)), refList)
 
 #new point coordinates calculation
-midPointX = (obList[0].Location.Point.X 
+midPointX = (obList[0].Location.Point.X
            + obList[1].Location.Point.X)/2
 midPointY =(obList[0].Location.Point.Y
            + obList[1].Location.Point.Y)/2
@@ -64,5 +70,3 @@ midPointXYZ = XYZ(vectorX, vectorY , 0)
 TransactionManager.Instance.EnsureInTransaction(doc)
 ElementTransformUtils.MoveElement(doc,  obList[2].Id, midPointXYZ)
 TransactionManager.Instance.TransactionTaskDone()
-
-OUT = midPointXYZ,  obList[2]
